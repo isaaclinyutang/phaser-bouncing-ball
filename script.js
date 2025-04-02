@@ -16,8 +16,8 @@ const game = new Phaser.Game(config);
 
 let ball;
 let ballSize = 80;
-let yspeed = 3;
-let xspeed = 3;
+let yspeed = 500;
+let xspeed = 20;
 let lives = 10; // Initialize lives
 let livesText; // Text to display lives
 let gameOverText; // Text to display "Game Over"
