@@ -14,11 +14,9 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-let ball;
+let balls = []; // Array to hold multiple balls
 let ballSize = 80;
-let yspeed = 500;
-let xspeed = 20;
-let lives = 10; // Initialize lives
+let lives = 20; // Initialize lives
 let livesText; // Text to display lives
 let gameOverText; // Text to display "Game Over"
 
@@ -27,28 +25,35 @@ function preload() {
 }
 
 function create() {
-    ball = this.add.sprite(WIDTH / 2, HEIGHT / 2, "ball"); // x, y, and the ball "key"
-    ball.setDisplaySize(ballSize, ballSize); // width, height
+    // Create 3 balls with different initial positions and speeds
+    for (let i = 0; i < 3; i++) {
+        let ball = {
+            sprite: this.add.sprite(WIDTH / 2, HEIGHT / 2, "ball"),
+            xspeed: 3 + i, // Different speeds for each ball
+            yspeed: 3 + i
+        };
+        ball.sprite.setDisplaySize(ballSize, ballSize);
+        ball.sprite.setInteractive();
 
-    // Enable input on the ball
-    ball.setInteractive();
+        // Add a click event listener to each ball
+        ball.sprite.on('pointerdown', () => {
+            if (lives > 0) {
+                // Reduce the ball size by 10%
+                ballSize *= 0.9;
+                ball.sprite.setDisplaySize(ballSize, ballSize);
 
-    // Add a click event listener to the ball
-    ball.on('pointerdown', () => {
-        if (lives > 0) {
-            // Reduce the ball size by 10%
-            ballSize *= 0.9;
-            ball.setDisplaySize(ballSize, ballSize);
+                // Increase the speed by 10%
+                ball.xspeed *= 1.1;
+                ball.yspeed *= 1.1;
 
-            // Increase the speed by 10%
-            xspeed *= 1.1;
-            yspeed *= 1.1;
+                // Increase lives by 1
+                lives++;
+                updateLivesText();
+            }
+        });
 
-            // Increase lives by 1
-            lives++;
-            updateLivesText();
-        }
-    });
+        balls.push(ball); // Add the ball to the array
+    }
 
     // Display lives on-screen
     livesText = this.add.text(10, 10, `Lives: ${lives}`, { fontSize: '32px', fill: '#fff' });
@@ -66,19 +71,22 @@ function update() {
         return;
     }
 
-    ball.y += yspeed;
-    ball.x += xspeed;
+    // Update each ball's position and check for collisions
+    balls.forEach(ball => {
+        ball.sprite.y += ball.yspeed;
+        ball.sprite.x += ball.xspeed;
 
-    // Check for wall collisions
-    if (ball.y >= HEIGHT - ballSize / 2 || ball.y <= ballSize / 2) {
-        yspeed *= -1; // Flip direction
-        reduceLives();
-    }
+        // Check for wall collisions
+        if (ball.sprite.y >= HEIGHT - ballSize / 2 || ball.sprite.y <= ballSize / 2) {
+            ball.yspeed *= -1; // Flip direction
+            reduceLives();
+        }
 
-    if (ball.x >= WIDTH - ballSize / 2 || ball.x <= ballSize / 2) {
-        xspeed *= -1; // Flip direction
-        reduceLives();
-    }
+        if (ball.sprite.x >= WIDTH - ballSize / 2 || ball.sprite.x <= ballSize / 2) {
+            ball.xspeed *= -1; // Flip direction
+            reduceLives();
+        }
+    });
 }
 
 function reduceLives() {
